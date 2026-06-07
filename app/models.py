@@ -9,7 +9,7 @@ class Categoria(Base):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, unique=True, index=True)
 
-    productos = relationship("Productos", back_populates="categoria")
+    productos = relationship("Productos", back_populates="categorias")
 
 
 class Productos(Base):
@@ -22,7 +22,7 @@ class Productos(Base):
     disponible = Column(Boolean, default=True)
     categoria_id = Column(Integer, ForeignKey("categorias.id"))
 
-    categoria = relationship("Categoria", back_populates="productos")
+    categorias = relationship("Categoria", back_populates="productos")
 
 
 class Usuario(Base):
