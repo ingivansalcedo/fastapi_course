@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.database import DATABASE_URL, engine, get_db
+from app.database import DATABASE_URL, get_db
 
 app = FastAPI()
 
