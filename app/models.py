@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, float, boolean, foreignkey
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
-from app.database import get_db, Base
+from database import Base
+
 
 class Categoria(Base):
     __tablename__ = "categorias"
@@ -17,9 +18,9 @@ class Productos(Base):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, index=True)
     descripcion = Column(String)
-    precio = Column(float)
-    disponible = Column(boolean, default=True)
-    categoria_id = Column(Integer, foreignkey("categorias.id"))
+    precio = Column(Float)
+    disponible = Column(Boolean, default=True)
+    categoria_id = Column(Integer, ForeignKey("categorias.id"))
 
     categoria = relationship("Categoria", back_populates="productos")
 
@@ -31,6 +32,6 @@ class Usuario(Base):
     nombre = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    is_active = Column(boolean, default=True)
+    is_active = Column(Boolean, default=True)
 
 
