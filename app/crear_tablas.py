@@ -1,5 +1,5 @@
-from database import Base, engine
-import models  # importa los modelos para que SQLAlchemy los registre
+from app.database import Base, engine
+import app.models  # importa los modelos para que SQLAlchemy los registre
 
 
 def create_tables() -> None:

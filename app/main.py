@@ -3,10 +3,10 @@ import os
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-import crud, schemas
+from . import crud, schemas
 
 
-from database import DATABASE_URL, get_db
+from app.database import DATABASE_URL, get_db
 
 app = FastAPI()
 
@@ -25,20 +25,29 @@ def db_test(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(exc))
     
 
+# ==================== ENDPOINTS PRODUCTOS ====================
+
+
 @app.get("/productos", response_model=list[schemas.ProductoResponse])
 def listar_productos(db: Session = Depends(get_db)):
     return crud.get_productos(db)
 
-@app.post("/productos", response_model=schemas.ProductoCreate)
-def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get_db)):
-    return crud.create_producto(db, producto)
 
-@app.put("/productos/{producto_id}", response_model=schemas.ProductoCreate)
-def actualizar_producto(producto_id: int, producto: schemas.ProductoCreate, db: Session = Depends(get_db)):
-    producto = crud.update_producto(db, producto_id, producto)
-    if not producto:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
-    return producto
+@app.post("/productos", response_model=schemas.ProductoResponse)
+def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get_db)):
+    created = crud.create_producto(db, producto)
+    if not created:
+        raise HTTPException(status_code=400, detail="Categoría no encontrada")
+    return created
+
+
+@app.put("/productos/{producto_id}", response_model=schemas.ProductoResponse)
+def actualizar_producto(producto_id: int, producto: schemas.ProductoUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_producto(db, producto_id, producto)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Producto no encontrado o categoría inválida")
+    return updated
+
 
 @app.delete("/productos/{producto_id}")
 def eliminar_producto(producto_id: int, db: Session = Depends(get_db)):
@@ -46,4 +55,89 @@ def eliminar_producto(producto_id: int, db: Session = Depends(get_db)):
     if not producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     return {"mensaje": "Producto eliminado"}
+
+
+# ==================== ENDPOINTS CATEGORIAS ====================
+
+
+@app.get("/categorias", response_model=list[schemas.CategoriaResponse])
+def listar_categorias(db: Session = Depends(get_db)):
+    return crud.get_categorias(db)
+
+
+@app.get("/categorias/{categoria_id}", response_model=schemas.CategoriaResponse)
+def obtener_categoria(categoria_id: int, db: Session = Depends(get_db)):
+    categoria = crud.get_categoria(db, categoria_id)
+    if not categoria:
+        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    return categoria
+
+
+@app.get("/categorias/{categoria_id}/productos", response_model=list[schemas.ProductoResponse])
+def listar_productos_por_categoria(categoria_id: int, db: Session = Depends(get_db)):
+    categoria = crud.get_categoria(db, categoria_id)
+    if not categoria:
+        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    return crud.get_productos_by_categoria(db, categoria_id)
+
+
+@app.post("/categorias", response_model=schemas.CategoriaResponse)
+def crear_categoria(categoria: schemas.CategoriaCreate, db: Session = Depends(get_db)):
+    existing = crud.get_categoria_by_nombre(db, categoria.nombre)
+    if existing:
+        raise HTTPException(status_code=400, detail="La categoría ya existe")
+    return crud.create_categoria(db, categoria)
+
+
+@app.put("/categorias/{categoria_id}", response_model=schemas.CategoriaResponse)
+def actualizar_categoria(categoria_id: int, categoria: schemas.CategoriaUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_categoria(db, categoria_id, categoria)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    return updated
+
+
+@app.delete("/categorias/{categoria_id}")
+def eliminar_categoria(categoria_id: int, db: Session = Depends(get_db)):
+    deleted = crud.delete_categoria(db, categoria_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    return {"mensaje": "Categoría eliminada"}
+
+# ==================== ENDPOINTS USUARIOS ====================
+
+
+
+@app.get("/usuarios", response_model=list[schemas.UsuarioResponse])
+def listar_usuarios(db: Session = Depends(get_db)):
+    print("Obteniendo usuarios...")
+    return crud.get_usuarios(db)
+
+@app.get("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse)
+def obtener_usuario(usuario_id: int, db: Session = Depends(get_db)):
+    usuario = crud.get_usuario(db, usuario_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return usuario
+
+@app.post("/usuarios", response_model=schemas.UsuarioResponse)
+def crear_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db)):
+    existing = crud.get_usuario_by_email(db, usuario.email)
+    if existing:
+        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    return crud.create_usuario(db, usuario)
+
+@app.put("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse)
+def actualizar_usuario(usuario_id: int, usuario: schemas.UsuarioUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_usuario(db, usuario_id, usuario)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return updated
+
+@app.delete("/usuarios/{usuario_id}")
+def eliminar_usuario(usuario_id: int, db: Session = Depends(get_db)):
+    deleted = crud.delete_usuario(db, usuario_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"mensaje": "Usuario eliminado"}
 
