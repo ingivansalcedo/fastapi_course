@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 
 
@@ -70,21 +70,24 @@ class ProductoWithCategoria(ProductoResponse):
 
 class UsuarioBase(BaseModel):
     nombre: str
-    email: str
+    email: EmailStr
 
 
 class UsuarioCreate(UsuarioBase):
     password: str
+    es_admin: bool = False
 
 
 class UsuarioUpdate(BaseModel):
     nombre: Optional[str] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     is_active: Optional[bool] = None
+    es_admin: Optional[bool] = None
 
 
 class UsuarioResponse(UsuarioBase):
     id: int
+    es_admin: bool
     is_active: bool
 
     class Config:
