@@ -32,3 +32,20 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+def verify_token(token: str) -> dict | None:
+    """
+    Verifica un token JWT y devuelve su contenido si es válido.
+
+    Args:
+        token: El token JWT a verificar.
+
+    Returns:
+        Un diccionario con el contenido del token si es válido, o None si no lo es.
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        return None
