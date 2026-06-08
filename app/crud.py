@@ -1,5 +1,21 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
+from .utils import hash_password, verify_password
+
+
+class DuplicateUserError(Exception):
+    """Excepción lanzada cuando se intenta crear un usuario ya existente."""
+    pass
+
+
+class NotFoundError(Exception):
+    """Recurso no encontrado."""
+    pass
+
+
+class InvalidDataError(Exception):
+    """Datos inválidos o dependencias faltantes (p. ej. categoría no existente)."""
+    pass
 
 
 # ==================== CRUD CATEGORIAS ====================
@@ -33,7 +49,7 @@ def update_categoria(db: Session, categoria_id: int, categoria: schemas.Categori
     """Actualizar una categoría"""
     db_categoria = get_categoria(db, categoria_id)
     if not db_categoria:
-        return None
+        raise NotFoundError("Categoría no encontrada")
     
     if categoria.nombre is not None:
         db_categoria.nombre = categoria.nombre
@@ -47,8 +63,8 @@ def delete_categoria(db: Session, categoria_id: int):
     """Eliminar una categoría"""
     db_categoria = get_categoria(db, categoria_id)
     if not db_categoria:
-        return None
-    
+        raise NotFoundError("Categoría no encontrada")
+
     db.delete(db_categoria)
     db.commit()
     return db_categoria
@@ -85,7 +101,7 @@ def create_producto(db: Session, producto: schemas.ProductoCreate):
     # Verificar que la categoría existe
     categoria = get_categoria(db, producto.categoria_id)
     if not categoria:
-        return None
+        raise InvalidDataError("Categoría no encontrada")
     
     db_producto = models.Productos(
         nombre=producto.nombre,
@@ -104,13 +120,13 @@ def update_producto(db: Session, producto_id: int, producto: schemas.ProductoUpd
     """Actualizar un producto"""
     db_producto = get_producto(db, producto_id)
     if not db_producto:
-        return None
+        raise NotFoundError("Producto no encontrado")
     
     # Validar categoría si se intenta cambiar
     if producto.categoria_id is not None:
         categoria = get_categoria(db, producto.categoria_id)
         if not categoria:
-            return None
+            raise InvalidDataError("Categoría inválida")
     
     if producto.nombre is not None:
         db_producto.nombre = producto.nombre
@@ -132,8 +148,8 @@ def delete_producto(db: Session, producto_id: int):
     """Eliminar un producto"""
     db_producto = get_producto(db, producto_id)
     if not db_producto:
-        return None
-    
+        raise NotFoundError("Producto no encontrado")
+
     db.delete(db_producto)
     db.commit()
     return db_producto
@@ -148,12 +164,21 @@ def get_usuarios(db: Session, skip: int = 0, limit: int = 100):
     """Obtener todos los usuarios con paginación"""
     return db.query(models.Usuario).offset(skip).limit(limit).all()
 
+def get_usuario_by_email(db: Session, email: str):
+    """Obtener un usuario por email"""
+    return db.query(models.Usuario).filter(models.Usuario.email == email).first()
+
 def create_usuario(db: Session, usuario: schemas.UsuarioCreate):
     """Crear un nuevo usuario"""
+    # Verificar si el usuario ya existe por email y evitar duplicados
+    existing = get_usuario_by_email(db, usuario.email)
+    if existing:
+        raise DuplicateUserError("El email ya está registrado")
+
     db_usuario = models.Usuario(
         nombre=usuario.nombre,
         email=usuario.email,
-        hashed_password=usuario.password  # En producción, hashea la contraseña
+        hashed_password=hash_password(usuario.password)  # En producción, hashea la contraseña
     )
     db.add(db_usuario)
     db.commit()
@@ -164,7 +189,7 @@ def update_usuario(db: Session, usuario_id: int, usuario: schemas.UsuarioUpdate)
     """Actualizar un usuario"""
     db_usuario = get_usuario(db, usuario_id)
     if not db_usuario:
-        return None
+        raise NotFoundError("Usuario no encontrado")
     
     if usuario.nombre is not None:
         db_usuario.nombre = usuario.nombre
@@ -181,13 +206,11 @@ def delete_usuario(db: Session, usuario_id: int):
     """Eliminar un usuario"""
     db_usuario = get_usuario(db, usuario_id)
     if not db_usuario:
-        return None
-    
+        raise NotFoundError("Usuario no encontrado")
+
     db.delete(db_usuario)
     db.commit()
     return db_usuario
 
-def get_usuario_by_email(db: Session, email: str):
-    """Obtener un usuario por email"""
-    return db.query(models.Usuario).filter(models.Usuario.email == email).first()
+
 
