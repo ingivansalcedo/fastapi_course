@@ -93,3 +93,12 @@ class UsuarioResponse(UsuarioBase):
     class Config:
         from_attributes = True
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+class Credentials(BaseModel):
+    """Schema para credenciales de login (email + contraseña)."""
+    email: EmailStr
+    password: str

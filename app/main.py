@@ -1,13 +1,11 @@
 import os
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from . import crud, schemas
-from fastapi import HTTPException
-
-
+from . import crud, schemas, auth
 from app.database import DATABASE_URL, get_db
+from deps import get_current_user
 
 app = FastAPI()
 
@@ -125,7 +123,7 @@ def obtener_usuario(usuario_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return usuario
 
-@app.post("/usuarios", response_model=schemas.UsuarioResponse)
+@app.post("/usuarios", response_model=schemas.UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def crear_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db)):
     try:
         return crud.create_usuario(db, usuario)
@@ -146,4 +144,60 @@ def eliminar_usuario(usuario_id: int, db: Session = Depends(get_db)):
         return {"mensaje": "Usuario eliminado"}
     except crud.NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
+
+@app.post("/login", response_model=schemas.Token)
+def login(credentials: schemas.Credentials, db: Session = Depends(get_db)):
+    """
+    Endpoint de login: valida email y contraseña, devuelve token JWT.
+
+    Args:
+        credentials: Email y contraseña del usuario.
+        db: Sesión de base de datos.
+
+    Returns:
+        Token JWT con tipo "bearer".
+    
+    Raises:
+        HTTPException: 401 si las credenciales son inválidas.
+    """
+    user = crud.get_usuario_by_email(db, credentials.email)
+    if not user or not auth.verify_password(credentials.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales inválidas",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token = auth.create_access_token(data={"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/me", response_model=schemas.UsuarioResponse)
+def leer_usuario_actual(current_user: schemas.UsuarioResponse = Depends(get_current_user)):
+    """
+    Endpoint para obtener información del usuario autenticado.
+
+    Args:
+        current_user: Usuario autenticado obtenido de la dependencia get_current_user.
+    Returns:
+        Información del usuario actual. Si el token es inválido o el usuario no existe, se lanza una excepción HTTP 401.
+    """
+    return current_user
+
+@app.get("/admin/ping")
+def admin_ping(current_user: schemas.UsuarioResponse = Depends(get_current_user)):
+    """
+    Endpoint de prueba para administradores.
+
+    Args:
+        current_user: Usuario autenticado obtenido de la dependencia get_current_user.
+    Returns:
+        Un mensaje de ping si el usuario es administrador. Si el usuario no es administrador, se lanza una excepción HTTP 403.
+    """
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
+    return {"message": "Pong! Solo los administradores pueden ver esto."}
+
 
