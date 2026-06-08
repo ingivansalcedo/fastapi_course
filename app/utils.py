@@ -52,9 +52,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     return pwd_context.verify(plain_password, hashed_password)
 
-
-
-"""Ejemplo de uso rápido (no usar en producción):"""
+#Ejemplo de uso rápido (no usar en producción):
 """
 if __name__ == "__main__":
     # Pequeña demostración / verificación rápida (no usar en producción).
