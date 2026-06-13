@@ -178,7 +178,8 @@ def create_usuario(db: Session, usuario: schemas.UsuarioCreate):
     db_usuario = models.Usuario(
         nombre=usuario.nombre,
         email=usuario.email,
-        hashed_password=hash_password(usuario.password)  # En producción, hashea la contraseña
+        hashed_password=hash_password(usuario.password),  # En producción, hashea la contraseña
+        es_admin=usuario.es_admin,
     )
     db.add(db_usuario)
     db.commit()
@@ -197,6 +198,8 @@ def update_usuario(db: Session, usuario_id: int, usuario: schemas.UsuarioUpdate)
         db_usuario.email = usuario.email
     if usuario.is_active is not None:
         db_usuario.is_active = usuario.is_active
+    if usuario.es_admin is not None:
+        db_usuario.es_admin = usuario.es_admin
     
     db.commit()
     db.refresh(db_usuario)

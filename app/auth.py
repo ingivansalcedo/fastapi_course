@@ -2,15 +2,15 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import os
+from .utils import hash_password, verify_password
 
 # Cargar variables de entorno desde .env
 load_dotenv()
 
 # Configuración de JWT
-SECRET_KEY = os.getenv("SECRET_KEY", "KblBeFYTrP5PrBZMkNDkFtT.liKKaoe")
-"""Clave secreta para firmar tokens JWT. Lee desde .env, usa default solo en desarrollo."""
-
-if not os.getenv("SECRET_KEY"):
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    SECRET_KEY = "KblBeFYTrP5PrBZMkNDkFtT.liKKaoe"
     print("⚠️  ADVERTENCIA: SECRET_KEY no definida en .env. Usando clave por defecto (NO SEGURA).")
 
 ALGORITHM = "HS256"

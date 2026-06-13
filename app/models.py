@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, text
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -32,8 +32,8 @@ class Usuario(Base):
     nombre = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
-    es_admin = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True, nullable=False, server_default=text('true'))
+    es_admin = Column(Boolean, default=False, nullable=False, server_default=text('false'))
 
 
 

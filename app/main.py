@@ -1,11 +1,12 @@
 import os
 
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from . import crud, schemas, auth
-from app.database import DATABASE_URL, get_db
-from deps import get_current_user
+from . import crud, schemas, auth, utils
+from .database import DATABASE_URL, get_db
+from .deps import get_current_user, requires_admin
 
 app = FastAPI()
 
@@ -111,8 +112,14 @@ def eliminar_categoria(categoria_id: int, db: Session = Depends(get_db)):
 
 
 
-@app.get("/usuarios", response_model=list[schemas.UsuarioResponse])
-def listar_usuarios(db: Session = Depends(get_db)):
+@app.get("/usuarios", response_model=list[schemas.UsuarioResponse], )
+def listar_usuarios(db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+    
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
     print("Obteniendo usuarios...")
     return crud.get_usuarios(db)
 
@@ -124,21 +131,38 @@ def obtener_usuario(usuario_id: int, db: Session = Depends(get_db)):
     return usuario
 
 @app.post("/usuarios", response_model=schemas.UsuarioResponse, status_code=status.HTTP_201_CREATED)
-def crear_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db)):
+def crear_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
+
     try:
         return crud.create_usuario(db, usuario)
     except crud.DuplicateUserError as exc:
         raise HTTPException(status_code=409, detail=str(exc))
 
 @app.put("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse)
-def actualizar_usuario(usuario_id: int, usuario: schemas.UsuarioUpdate, db: Session = Depends(get_db)):
+def actualizar_usuario(usuario_id: int, usuario: schemas.UsuarioUpdate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
     try:
         return crud.update_usuario(db, usuario_id, usuario)
     except crud.NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
 
 @app.delete("/usuarios/{usuario_id}")
-def eliminar_usuario(usuario_id: int, db: Session = Depends(get_db)):
+def eliminar_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
     try:
         crud.delete_usuario(db, usuario_id)
         return {"mensaje": "Usuario eliminado"}
@@ -146,12 +170,13 @@ def eliminar_usuario(usuario_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(exc))
 
 @app.post("/login", response_model=schemas.Token)
-def login(credentials: schemas.Credentials, db: Session = Depends(get_db)):
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    print(f"Intentando login para email: {form_data.username}")
     """
     Endpoint de login: valida email y contraseña, devuelve token JWT.
 
     Args:
-        credentials: Email y contraseña del usuario.
+        form_data: Datos enviados por OAuth2 password flow (username + password).
         db: Sesión de base de datos.
 
     Returns:
@@ -160,8 +185,8 @@ def login(credentials: schemas.Credentials, db: Session = Depends(get_db)):
     Raises:
         HTTPException: 401 si las credenciales son inválidas.
     """
-    user = crud.get_usuario_by_email(db, credentials.email)
-    if not user or not auth.verify_password(credentials.password, user.hashed_password):
+    user = crud.get_usuario_by_email(db, form_data.username)
+    if not user or not utils.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales inválidas",
@@ -184,7 +209,7 @@ def leer_usuario_actual(current_user: schemas.UsuarioResponse = Depends(get_curr
     return current_user
 
 @app.get("/admin/ping")
-def admin_ping(current_user: schemas.UsuarioResponse = Depends(get_current_user)):
+def admin_ping(current_user: schemas.UsuarioResponse = Depends(requires_admin)):
     """
     Endpoint de prueba para administradores.
 

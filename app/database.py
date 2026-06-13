@@ -7,16 +7,21 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.orm.session import Session
 
 
+from pydantic import ConfigDict
+
 class Settings(BaseSettings):
     db_user: str = "postgres"
     db_password: str = "postgres"
     db_host: str = "localhost"
     db_port: int = 5432
     db_name: str = "ecommerce_db"
+    secret_key: str | None = None
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     @property
     def database_url(self) -> str:
