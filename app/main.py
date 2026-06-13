@@ -34,7 +34,14 @@ def listar_productos(db: Session = Depends(get_db)):
 
 
 @app.post("/productos", response_model=schemas.ProductoResponse)
-def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get_db)):
+def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
+
     try:
         return crud.create_producto(db, producto)
     except crud.InvalidDataError as exc:
@@ -42,7 +49,13 @@ def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get
 
 
 @app.put("/productos/{producto_id}", response_model=schemas.ProductoResponse)
-def actualizar_producto(producto_id: int, producto: schemas.ProductoUpdate, db: Session = Depends(get_db)):
+def actualizar_producto(producto_id: int, producto: schemas.ProductoUpdate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
+
     try:
         return crud.update_producto(db, producto_id, producto)
     except crud.NotFoundError as exc:
@@ -52,7 +65,12 @@ def actualizar_producto(producto_id: int, producto: schemas.ProductoUpdate, db: 
 
 
 @app.delete("/productos/{producto_id}")
-def eliminar_producto(producto_id: int, db: Session = Depends(get_db)):
+def eliminar_producto(producto_id: int, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
     try:
         crud.delete_producto(db, producto_id)
         return {"mensaje": "Producto eliminado"}
@@ -85,7 +103,12 @@ def listar_productos_por_categoria(categoria_id: int, db: Session = Depends(get_
 
 
 @app.post("/categorias", response_model=schemas.CategoriaResponse)
-def crear_categoria(categoria: schemas.CategoriaCreate, db: Session = Depends(get_db)):
+def crear_categoria(categoria: schemas.CategoriaCreate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
     existing = crud.get_categoria_by_nombre(db, categoria.nombre)
     if existing:
         raise HTTPException(status_code=400, detail="La categoría ya existe")
@@ -93,7 +116,12 @@ def crear_categoria(categoria: schemas.CategoriaCreate, db: Session = Depends(ge
 
 
 @app.put("/categorias/{categoria_id}", response_model=schemas.CategoriaResponse)
-def actualizar_categoria(categoria_id: int, categoria: schemas.CategoriaUpdate, db: Session = Depends(get_db)):
+def actualizar_categoria(categoria_id: int, categoria: schemas.CategoriaUpdate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
     try:
         return crud.update_categoria(db, categoria_id, categoria)
     except crud.NotFoundError as exc:
@@ -101,7 +129,14 @@ def actualizar_categoria(categoria_id: int, categoria: schemas.CategoriaUpdate, 
 
 
 @app.delete("/categorias/{categoria_id}")
-def eliminar_categoria(categoria_id: int, db: Session = Depends(get_db)):
+def eliminar_categoria(categoria_id: int, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
+
+    if not current_user.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permisos insuficientes: se requieren privilegios de administrador",
+        )
+    
     try:
         crud.delete_categoria(db, categoria_id)
         return {"mensaje": "Categoría eliminada"}
@@ -113,13 +148,7 @@ def eliminar_categoria(categoria_id: int, db: Session = Depends(get_db)):
 
 
 @app.get("/usuarios", response_model=list[schemas.UsuarioResponse], )
-def listar_usuarios(db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
-    
-    if not current_user.es_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Permisos insuficientes: se requieren privilegios de administrador",
-        )
+def listar_usuarios(db: Session = Depends(get_db)):
     print("Obteniendo usuarios...")
     return crud.get_usuarios(db)
 
@@ -138,7 +167,7 @@ def crear_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db),
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Permisos insuficientes: se requieren privilegios de administrador",
         )
-
+    
     try:
         return crud.create_usuario(db, usuario)
     except crud.DuplicateUserError as exc:
