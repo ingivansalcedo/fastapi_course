@@ -29,3 +29,12 @@ DATABASE_URL = settings.database_url
 engine = create_engine(DATABASE_URL, echo=True, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 Base = declarative_base()
+
+
+def get_db():
+    """Dependency - yield a SQLAlchemy session and ensure it's closed after use."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

@@ -1,6 +1,7 @@
-from db.database import Base
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
+from app.db.database import Base
 
 
 class Productos(Base):
