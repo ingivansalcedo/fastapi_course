@@ -1,13 +1,10 @@
 from pathlib import Path
-import sys
-
-ROOT_DIR = Path(__file__).resolve().parent.parent
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
 
 from sqlalchemy import inspect, text
-from app.database import Base, engine
-import app.models  # importa los modelos para que SQLAlchemy registre los modelos
+
+from app.db.database import Base, engine
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
 
 
 def _get_existing_columns(table_name: str) -> set[str]:

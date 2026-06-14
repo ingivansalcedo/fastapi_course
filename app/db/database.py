@@ -1,13 +1,8 @@
-import os
-from typing import Generator
-
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.orm.session import Session
 
-
-from pydantic import ConfigDict
 
 class Settings(BaseSettings):
     db_user: str = "postgres"
@@ -34,12 +29,3 @@ DATABASE_URL = settings.database_url
 engine = create_engine(DATABASE_URL, echo=True, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 Base = declarative_base()
-
-
-def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
