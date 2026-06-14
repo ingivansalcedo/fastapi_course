@@ -52,7 +52,7 @@ def update_usuario(db: Session, usuario_id: int, usuario: schemas.UsuarioUpdate)
     db_usuario = get_usuario(db, usuario_id)
     if not db_usuario:
         raise NotFoundError("Usuario no encontrado")
-    
+
     if usuario.nombre is not None:
         db_usuario.nombre = usuario.nombre
     if usuario.email is not None:
@@ -61,7 +61,7 @@ def update_usuario(db: Session, usuario_id: int, usuario: schemas.UsuarioUpdate)
         db_usuario.is_active = usuario.is_active
     if usuario.es_admin is not None:
         db_usuario.es_admin = usuario.es_admin
-    
+
     db.commit()
     db.refresh(db_usuario)
     return db_usuario

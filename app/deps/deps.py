@@ -39,7 +39,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             detail="Token de autenticación inválido o expirado",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     username: str = payload.get("sub")
     if username is None:
         raise HTTPException(
@@ -47,7 +47,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             detail="Token de autenticación inválido",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     user = crud.get_usuario_by_email(db, email=username)
     if user is None:
         raise HTTPException(
@@ -55,7 +55,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             detail="Usuario no encontrado",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return user
 
 
@@ -75,6 +75,6 @@ def requires_admin(user = Depends(get_current_user)):
         )
     return user
 
-"""Utilidades para manejo de contraseñas usando bcrypt a través de PassLib. Incluye funciones para hashear y verificar contraseñas, 
+"""Utilidades para manejo de contraseñas usando bcrypt a través de PassLib. Incluye funciones para hashear y verificar contraseñas,
 con configuración ajustable del coste de bcrypt vía variable de entorno.
 """

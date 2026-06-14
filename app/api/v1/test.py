@@ -21,4 +21,3 @@ def db_test(db: Session = Depends(get_db)):
         return {"database": "connected"}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-    

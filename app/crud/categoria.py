@@ -41,10 +41,10 @@ def update_categoria(db: Session, categoria_id: int, categoria: schemas.Categori
     db_categoria = get_categoria(db, categoria_id)
     if not db_categoria:
         raise NotFoundError("Categoría no encontrada")
-    
+
     if categoria.nombre is not None:
         db_categoria.nombre = categoria.nombre
-    
+
     db.commit()
     db.refresh(db_categoria)
     return db_categoria

@@ -44,7 +44,7 @@ def create_producto(db: Session, producto: schemas.ProductoCreate):
     categoria = get_categoria(db, producto.categoria_id)
     if not categoria:
         raise InvalidDataError("Categoría no encontrada")
-    
+
     db_producto = Productos(
         nombre=producto.nombre,
         descripcion=producto.descripcion,
@@ -63,13 +63,13 @@ def update_producto(db: Session, producto_id: int, producto: schemas.ProductoUpd
     db_producto = get_producto(db, producto_id)
     if not db_producto:
         raise NotFoundError("Producto no encontrado")
-    
+
     # Validar categoría si se intenta cambiar
     if producto.categoria_id is not None:
         categoria = get_categoria(db, producto.categoria_id)
         if not categoria:
             raise InvalidDataError("Categoría inválida")
-    
+
     if producto.nombre is not None:
         db_producto.nombre = producto.nombre
     if producto.descripcion is not None:
@@ -80,7 +80,7 @@ def update_producto(db: Session, producto_id: int, producto: schemas.ProductoUpd
         db_producto.disponible = producto.disponible
     if producto.categoria_id is not None:
         db_producto.categoria_id = producto.categoria_id
-    
+
     db.commit()
     db.refresh(db_producto)
     return db_producto

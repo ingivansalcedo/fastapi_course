@@ -48,4 +48,3 @@ def create_or_update_tables() -> None:
 if __name__ == "__main__":
     create_or_update_tables()
     print("Tablas creadas/actualizadas correctamente")
-

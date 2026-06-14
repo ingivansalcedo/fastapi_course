@@ -65,7 +65,7 @@ def eliminar_categoria(categoria_id: int, db: Session = Depends(get_db), current
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Permisos insuficientes: se requieren privilegios de administrador",
         )
-    
+
     try:
         crud.delete_categoria(db, categoria_id)
         return {"mensaje": "Categoría eliminada"}

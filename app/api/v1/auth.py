@@ -35,7 +35,7 @@ def crear_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db),
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Permisos insuficientes: se requieren privilegios de administrador",
         )
-    
+
     try:
         return crud.create_usuario(db, usuario)
     except crud.DuplicateUserError as exc:
@@ -78,7 +78,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
     Returns:
         Token JWT con tipo "bearer".
-    
+
     Raises:
         HTTPException: 401 si las credenciales son inválidas.
     """
@@ -121,4 +121,3 @@ def admin_ping(current_user: schemas.UsuarioResponse = Depends(requires_admin)):
             detail="Permisos insuficientes: se requieren privilegios de administrador",
         )
     return {"message": "Pong! Solo los administradores pueden ver esto."}
-
