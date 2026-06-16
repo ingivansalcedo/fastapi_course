@@ -9,6 +9,7 @@ from app import crud
 from app.core.security import verify_token
 from app.db.database import SessionLocal
 
+"""Database connection and session management for the application."""
 
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()

@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from jose import jwt
 from passlib.context import CryptContext
 
+from app.core.config import settings
+
 # Cargar variables de entorno desde .env
 load_dotenv()
 
@@ -14,8 +16,9 @@ if not SECRET_KEY:
     SECRET_KEY = "KblBeFYTrP5PrBZMkNDkFtT.liKKaoe"
     print("⚠️  ADVERTENCIA: SECRET_KEY no definida en .env. Usando clave por defecto (NO SEGURA).")
 
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ALGORITHM = settings.ALGORITHM
+
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """
@@ -29,7 +32,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
         Un token JWT como string.
     """
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=int(settings.ACCESS_TOKEN_EXPIRE_MINUTES)))
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

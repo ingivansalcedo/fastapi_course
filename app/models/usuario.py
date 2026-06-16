@@ -1,6 +1,5 @@
+from db.database import Base
 from sqlalchemy import Boolean, Column, Integer, String, text
-
-from app.db.database import Base
 
 
 class Usuario(Base):
