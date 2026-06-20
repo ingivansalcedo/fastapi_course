@@ -9,6 +9,7 @@ from .pedidos import (
     CarritoItem,
     CarritoResponse,
     ItemCarritoCreate,
+    ItemCarritoUpdate,
     PedidoItem,
     PedidoResponse,
 )
@@ -48,6 +49,7 @@ __all__ = [
     "CarritoItem",
     "CarritoResponse",
     "ItemCarritoCreate",
+    "ItemCarritoUpdate",
     "PedidoItem",
     "PedidoResponse",
 ]

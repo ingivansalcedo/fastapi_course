@@ -11,6 +11,7 @@ class Productos(Base):
     nombre = Column(String, index=True)
     descripcion = Column(String)
     precio = Column(Float)
+    stock = Column(Integer, default=0, nullable=False)
     disponible = Column(Boolean, default=True)
     categoria_id = Column(Integer, ForeignKey("categorias.id"))
 

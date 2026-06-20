@@ -18,6 +18,10 @@ class ItemCarritoCreate(BaseModel):
     producto_id: int
     cantidad: int
 
+
+class ItemCarritoUpdate(BaseModel):
+    cantidad: int
+
 # ==================== PEDIDOS ====================
 
 class PedidoItem(BaseModel):

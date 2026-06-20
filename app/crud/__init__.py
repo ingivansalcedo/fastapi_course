@@ -1,4 +1,5 @@
 from .carrito import (
+    actualizar_cantidad_item_carrito,
     agregar_item_al_carrito,
     eliminar_carrito,
     eliminar_item_del_carrito,
@@ -61,6 +62,7 @@ __all__ = [
     "update_producto",
     "delete_producto",
     "agregar_item_al_carrito",
+    "actualizar_cantidad_item_carrito",
     "eliminar_carrito",
     "eliminar_item_del_carrito",
     "get_carrito",

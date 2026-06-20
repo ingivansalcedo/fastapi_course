@@ -15,7 +15,15 @@ def agregar_item_al_carrito(item: schemas.ItemCarritoCreate, db: Session = Depen
     try:
         return crud.agregar_item_al_carrito(db, current_user.id, item.producto_id, item.cantidad)
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@api_router.put("/carrito/items/{producto_id}", response_model=schemas.CarritoResponse)
+def actualizar_cantidad_item_carrito(producto_id: int, item: schemas.ItemCarritoUpdate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(get_current_user)):
+    try:
+        return crud.actualizar_cantidad_item_carrito(db, current_user.id, producto_id, item.cantidad)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 @api_router.delete("/carrito/items/{producto_id}", response_model=schemas.CarritoResponse)
 def eliminar_item_del_carrito(producto_id: int, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(get_current_user)):

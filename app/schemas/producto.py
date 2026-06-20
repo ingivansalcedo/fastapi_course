@@ -13,6 +13,7 @@ class ProductoBase(BaseModel):
     nombre: str
     descripcion: Optional[str] = None
     precio: float
+    stock: int = 0
     disponible: bool = True
     categoria_id: int
 
@@ -25,6 +26,7 @@ class ProductoUpdate(BaseModel):
     nombre: Optional[str] = None
     descripcion: Optional[str] = None
     precio: Optional[float] = None
+    stock: Optional[int] = None
     disponible: Optional[bool] = None
     categoria_id: Optional[int] = None
 
