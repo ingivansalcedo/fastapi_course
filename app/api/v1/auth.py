@@ -8,7 +8,8 @@ from app.deps import get_current_user, get_db, requires_admin
 
 api_router = APIRouter()
 
-@api_router.post("/login", response_model=schemas.Token)
+@api_router.post("/login", response_model=schemas.Token, summary="Login", description="Obtener un token JWT para autenticación",
+                 response_description="Token JWT con tipo 'bearer'")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     print(f"Intentando login para email: {form_data.username}")
     """
@@ -35,7 +36,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@api_router.get("/me", response_model=schemas.UsuarioResponse)
+@api_router.get("/me", response_model=schemas.UsuarioResponse, summary="Obtener usuario actual", description="Obtener información del usuario autenticado",
+                response_description="Información del usuario actual")
 def leer_usuario_actual(current_user: schemas.UsuarioResponse = Depends(get_current_user)):
     """
     Endpoint para obtener información del usuario autenticado.
@@ -47,7 +49,8 @@ def leer_usuario_actual(current_user: schemas.UsuarioResponse = Depends(get_curr
     """
     return current_user
 
-@api_router.get("/admin/ping")
+@api_router.get("/admin/ping", summary="Ping de administrador", description="Endpoint de prueba para administradores",
+                response_description="Mensaje de ping para administradores")
 def admin_ping(current_user: schemas.UsuarioResponse = Depends(requires_admin)):
     """
     Endpoint de prueba para administradores.

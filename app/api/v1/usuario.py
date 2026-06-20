@@ -12,19 +12,27 @@ api_router = APIRouter()
 
 
 
-@api_router.get("/usuarios", response_model=list[schemas.UsuarioResponse], )
+@api_router.get("/usuarios", response_model=list[schemas.UsuarioResponse],
+                summary="Listar usuarios", description="Obtener una lista de todos los usuarios registrados",
+                response_description="Lista de usuarios"
+                )
 def listar_usuarios(db: Session = Depends(get_db)):
     print("Obteniendo usuarios...")
     return crud.get_usuarios(db)
 
-@api_router.get("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse)
+@api_router.get("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse,
+                summary="Obtener usuario",
+                description="Obtener los detalles de un usuario específico por su ID",
+                response_description="Detalles del usuario")
 def obtener_usuario(usuario_id: int, db: Session = Depends(get_db)):
     usuario = crud.get_usuario(db, usuario_id)
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return usuario
 
-@api_router.post("/usuarios", response_model=schemas.UsuarioResponse, status_code=status.HTTP_201_CREATED)
+@api_router.post("/usuarios", response_model=schemas.UsuarioResponse, status_code=status.HTTP_201_CREATED,
+                 summary="Crear usuario", description="Crear un nuevo usuario",
+                 response_description="Usuario creado exitosamente")
 def crear_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
 
     if not current_user.es_admin:
@@ -38,7 +46,9 @@ def crear_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db),
     except crud.DuplicateUserError as exc:
         raise HTTPException(status_code=409, detail=str(exc))
 
-@api_router.put("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse)
+@api_router.put("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse,
+                summary="Actualizar usuario", description="Actualizar los detalles de un usuario existente",
+                response_description="Usuario actualizado exitosamente")
 def actualizar_usuario(usuario_id: int, usuario: schemas.UsuarioUpdate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
     if not current_user.es_admin:
         raise HTTPException(
@@ -50,7 +60,9 @@ def actualizar_usuario(usuario_id: int, usuario: schemas.UsuarioUpdate, db: Sess
     except crud.NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
 
-@api_router.delete("/usuarios/{usuario_id}")
+@api_router.delete("/usuarios/{usuario_id}",
+                   summary="Eliminar usuario", description="Eliminar un usuario existente",
+                   response_description="Usuario eliminado exitosamente")
 def eliminar_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
     if not current_user.es_admin:
         raise HTTPException(

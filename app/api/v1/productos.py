@@ -15,7 +15,9 @@ def listar_productos(db: Session = Depends(get_db)):
     return crud.get_productos(db)
 
 
-@api_router.post("/productos", response_model=schemas.ProductoResponse)
+@api_router.post("/productos", response_model=schemas.ProductoResponse, status_code=status.HTTP_201_CREATED,
+                 summary="Crear producto", description="Crear un nuevo producto",
+                 response_description="Producto creado exitosamente")
 def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
 
     if not current_user.es_admin:
@@ -30,7 +32,9 @@ def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get
         raise HTTPException(status_code=400, detail=str(exc))
 
 
-@api_router.put("/productos/{producto_id}", response_model=schemas.ProductoResponse)
+@api_router.put("/productos/{producto_id}", response_model=schemas.ProductoResponse,
+                summary="Actualizar producto", description="Actualizar los detalles de un producto existente",
+                response_description="Producto actualizado exitosamente")
 def actualizar_producto(producto_id: int, producto: schemas.ProductoUpdate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
     if not current_user.es_admin:
         raise HTTPException(
@@ -46,7 +50,9 @@ def actualizar_producto(producto_id: int, producto: schemas.ProductoUpdate, db: 
         raise HTTPException(status_code=400, detail=str(exc))
 
 
-@api_router.delete("/productos/{producto_id}")
+@api_router.delete("/productos/{producto_id}",
+                   summary="Eliminar producto", description="Eliminar un producto existente",
+                   response_description="Producto eliminado exitosamente")
 def eliminar_producto(producto_id: int, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
     if not current_user.es_admin:
         raise HTTPException(
