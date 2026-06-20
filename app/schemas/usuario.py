@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 # ==================== USUARIOS ====================
 
@@ -25,9 +25,7 @@ class UsuarioResponse(UsuarioBase):
     id: int
     es_admin: bool
     is_active: bool
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class Token(BaseModel):
     access_token: str

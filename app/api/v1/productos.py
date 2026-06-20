@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
+from app.crud.producto import InvalidDataError, NotFoundError
 from app.deps import get_db, requires_admin
 
 api_router = APIRouter()
@@ -10,12 +11,12 @@ api_router = APIRouter()
 # ==================== ENDPOINTS PRODUCTOS ====================
 
 
-@api_router.get("/productos", response_model=list[schemas.ProductoResponse])
+@api_router.get("", response_model=list[schemas.ProductoResponse])
 def listar_productos(db: Session = Depends(get_db)):
     return crud.get_productos(db)
 
 
-@api_router.post("/productos", response_model=schemas.ProductoResponse, status_code=status.HTTP_201_CREATED,
+@api_router.post("", response_model=schemas.ProductoResponse, status_code=status.HTTP_201_CREATED,
                  summary="Crear producto", description="Crear un nuevo producto",
                  response_description="Producto creado exitosamente")
 def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
@@ -28,11 +29,11 @@ def agregar_producto(producto: schemas.ProductoCreate, db: Session = Depends(get
 
     try:
         return crud.create_producto(db, producto)
-    except crud.InvalidDataError as exc:
+    except InvalidDataError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
 
-@api_router.put("/productos/{producto_id}", response_model=schemas.ProductoResponse,
+@api_router.put("/{producto_id}", response_model=schemas.ProductoResponse,
                 summary="Actualizar producto", description="Actualizar los detalles de un producto existente",
                 response_description="Producto actualizado exitosamente")
 def actualizar_producto(producto_id: int, producto: schemas.ProductoUpdate, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
@@ -44,13 +45,13 @@ def actualizar_producto(producto_id: int, producto: schemas.ProductoUpdate, db: 
 
     try:
         return crud.update_producto(db, producto_id, producto)
-    except crud.NotFoundError as exc:
+    except NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
-    except crud.InvalidDataError as exc:
+    except InvalidDataError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
 
-@api_router.delete("/productos/{producto_id}",
+@api_router.delete("/{producto_id}",
                    summary="Eliminar producto", description="Eliminar un producto existente",
                    response_description="Producto eliminado exitosamente")
 def eliminar_producto(producto_id: int, db: Session = Depends(get_db), current_user: schemas.UsuarioResponse = Depends(requires_admin)):
@@ -62,5 +63,5 @@ def eliminar_producto(producto_id: int, db: Session = Depends(get_db), current_u
     try:
         crud.delete_producto(db, producto_id)
         return {"mensaje": "Producto eliminado"}
-    except crud.NotFoundError as exc:
+    except NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc))

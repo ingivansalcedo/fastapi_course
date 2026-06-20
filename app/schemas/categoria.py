@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 if TYPE_CHECKING:
     from app.schemas.producto import ProductoResponse
@@ -23,13 +23,9 @@ class CategoriaUpdate(CategoriaBase):
 
 class CategoriaResponse(CategoriaBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CategoriaWithProductos(CategoriaResponse):
     productos: List["ProductoResponse"] = []
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

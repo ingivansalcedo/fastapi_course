@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # ==================== CARRITO ====================
 
@@ -10,9 +10,7 @@ class CarritoResponse(BaseModel):
     id: int
     cliente_id: int
     items: list[CarritoItem]
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ItemCarritoCreate(BaseModel):
     producto_id: int
@@ -27,14 +25,10 @@ class ItemCarritoUpdate(BaseModel):
 class PedidoItem(BaseModel):
     producto_id: int
     cantidad: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class PedidoResponse(BaseModel):
     id: int
     usuario_id: int
     detalles: list[PedidoItem]
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
