@@ -1,5 +1,9 @@
+from pathlib import Path
+
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -13,7 +17,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
 
     model_config = ConfigDict(
-        env_file=".env",
+        env_file=str(PROJECT_ROOT / ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )

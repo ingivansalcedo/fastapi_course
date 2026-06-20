@@ -19,6 +19,21 @@ dependencies = [
     "alembic>=1.18.4",
 ]
 
+[project.scripts]
+db-current = "app.cli:db_current"
+db-downgrade = "app.cli:db_downgrade"
+db-history = "app.cli:db_history"
+db-revision = "app.cli:db_revision"
+db-stamp = "app.cli:db_stamp"
+db-upgrade = "app.cli:db_upgrade"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [tool.isort]
 profile = "black"
 line_length = 88

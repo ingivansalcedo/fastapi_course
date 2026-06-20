@@ -1,6 +1,7 @@
-from db.database import Base
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
+from app.db.database import Base
 
 
 class Productos(Base):
@@ -14,3 +15,5 @@ class Productos(Base):
     categoria_id = Column(Integer, ForeignKey("categorias.id"))
 
     categoria = relationship("Categoria", back_populates="productos")
+    itemscarrito = relationship("ItemsCarrito", back_populates="producto", cascade="all, delete-orphan")
+    detalles_pedido = relationship("DetallesPedido", back_populates="producto", cascade="all, delete-orphan")

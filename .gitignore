@@ -1,12 +1,41 @@
-# Python-generated files
+# Python artifacts
 __pycache__/
-*.py[oc]
+*.py[cod]
+*.pyd
+*.so
+
+# Build artifacts
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
+.eggs/
 
 # Virtual environments
-.venv
+.venv/
+venv/
+
+# Environment and secrets
 .env
-__init__.py
+.env.*
+!.env.example
+
+# Tool caches
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Alembic caches
+app/alembic/versions/*.pyc
+app/alembic/versions/*.pyo
+app/alembic/versions/__pycache__/

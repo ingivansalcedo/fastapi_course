@@ -1,5 +1,7 @@
-from db.database import Base
 from sqlalchemy import Boolean, Column, Integer, String, text
+from sqlalchemy.orm import relationship
+
+from app.db.database import Base
 
 
 class Usuario(Base):
@@ -11,3 +13,5 @@ class Usuario(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True, nullable=False, server_default=text('true'))
     es_admin = Column(Boolean, default=False, nullable=False, server_default=text('false'))
+    carrito = relationship("Carrito", back_populates="cliente", cascade="all, delete-orphan", uselist=False)
+    pedidos = relationship("Pedidos", back_populates="usuario", cascade="all, delete-orphan")
